@@ -1,0 +1,30 @@
+{
+  "name": "paster-cli",
+  "version": "0.4.3",
+  "description": "Paste from the terminal to a paster instance: pipe, files, clipboard, with optional end-to-end encryption.",
+  "type": "module",
+  "bin": {
+    "paster": "paster.mjs"
+  },
+  "files": [
+    "paster.mjs",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "pastebin",
+    "paste",
+    "cli",
+    "clipboard",
+    "encryption"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mehermankar/paster.git",
+    "directory": "cli"
+  },
+  "homepage": "https://github.com/mehermankar/paster#readme"
+}

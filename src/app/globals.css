@@ -1,0 +1,368 @@
+@import "tailwindcss";
+
+/* ---------- Design tokens ---------------------------------------------------
+   Neutral, warm-gray palette with one restrained accent. Light is the default;
+   `.dark` on <html> switches everything (set before paint by ThemeScript).
+---------------------------------------------------------------------------- */
+/* Palette inspired by engram: three greys, one accent, hairlines instead of shadows. */
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #eceef1;
+  --border: #dde0e5;
+  --border-strong: #c7ccd4;
+  --fg: #15171a;
+  --fg-muted: #5c6370;
+  --fg-faint: #666d75;
+  --accent: #2e4fd6;
+  --accent-fg: #ffffff;
+  --accent-soft: rgba(46, 79, 214, 0.1);
+  --danger: #c2352b;
+  --success: #1f8a4c;
+  --warning: #b45309;
+  --code-bg: #ffffff;
+  --gutter: #666d75;
+  --line-hl: rgba(46, 79, 214, 0.1);
+  --selection: rgba(46, 79, 214, 0.18);
+  --ring: #2e4fd6;
+  --shadow: none;
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0f1114;
+  --surface: #171a1f;
+  --surface-2: #22262c;
+  --border: #272a30;
+  --border-strong: #363b44;
+  --fg: #edeff2;
+  --fg-muted: #a3a9b3;
+  --fg-faint: #828996;
+  --accent: #7b96ff;
+  --accent-fg: #0f1114;
+  --accent-soft: rgba(123, 150, 255, 0.14);
+  --danger: #e5574b;
+  --success: #4cc27a;
+  --warning: #e2a33b;
+  --code-bg: #12151a;
+  --gutter: #828996;
+  --line-hl: rgba(123, 150, 255, 0.14);
+  --selection: rgba(123, 150, 255, 0.28);
+  --ring: #7b96ff;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-faint: var(--fg-faint);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-code-bg: var(--code-bg);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --shadow-pop: var(--shadow);
+  --ease-quint: var(--ease);
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------- Mobile app shell ------------------------------------------------
+   Under the sm breakpoint the editor and the paste page use a fixed bottom bar and
+   bottom sheets instead of the desktop toolbars. Shared sizes keep the paddings honest.
+   The editor is not sized explicitly: <main> pads itself above the bar (pb-bar) and the
+   editor card is flex-1 inside the min-h-dvh shell, so it always ends exactly at the bar. */
+:root {
+  --bar-h: calc(3.5rem + 1px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+/* Room for the fixed bottom bar under the content. */
+@utility pb-bar {
+  padding-bottom: calc(var(--bar-h) + var(--safe-b));
+}
+/* Bottom padding that clears the home indicator on phones. */
+@utility pb-safe {
+  padding-bottom: max(1rem, var(--safe-b));
+}
+/* Side padding for fixed and top-layer surfaces, which body padding does not reach. */
+@utility px-inset {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* ---------- Base ------------------------------------------------------------
+   Inside @layer base so Tailwind utilities (a later layer) can override these.
+---------------------------------------------------------------------------- */
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* viewport-fit=cover: keep every in-flow surface clear of the notch in landscape. */
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  ::selection {
+    background: var(--selection);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* Thin, unobtrusive scrollbars in both themes. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 999px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/* ---------- Code rendering -------------------------------------------------- */
+.code {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.6;
+  tab-size: 4;
+  font-variant-ligatures: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* shiki dual-theme: tokens carry --shiki-light / --shiki-dark variables. */
+.code span[style*="--shiki-light"] {
+  color: var(--shiki-light);
+}
+.dark .code span[style*="--shiki-dark"] {
+  color: var(--shiki-dark);
+}
+
+.line-hl {
+  background: var(--line-hl);
+}
+
+/* Editor textarea and gutter share metrics so line numbers align. The size is a variable because
+   it grows on touch screens (see the coarse-pointer block below). */
+:root {
+  --editor-font-size: 13.5px;
+}
+.editor-gutter,
+.editor-textarea {
+  font-family: var(--font-mono);
+  font-size: var(--editor-font-size);
+  line-height: 1.6;
+  tab-size: 4;
+}
+.editor-textarea {
+  white-space: pre;
+  overflow: auto;
+}
+
+/* iOS Safari zooms the whole page when a focused input, select or textarea is under 16px, so on
+   touch screens every text control is 16px. Unlayered on purpose: it has to beat the text-[…px]
+   utilities that size the controls on desktop. */
+@media (pointer: coarse) {
+  :root {
+    --editor-font-size: 16px;
+  }
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* ---------- Prose (rendered markdown) --------------------------------------- */
+.prose {
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 72ch;
+  /* Long URLs / tokens wrap instead of widening the article. */
+  overflow-wrap: anywhere;
+}
+.prose > * + * {
+  margin-top: 0.9em;
+}
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  margin-top: 1.6em;
+}
+.prose h1 {
+  font-size: 1.75em;
+}
+.prose h2 {
+  font-size: 1.35em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border);
+}
+.prose h3 {
+  font-size: 1.1em;
+}
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+.prose pre {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.85em 1em;
+  overflow-x: auto;
+}
+.prose pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 13px;
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.5em;
+}
+.prose ul {
+  list-style: disc;
+}
+.prose ol {
+  list-style: decimal;
+}
+.prose li + li {
+  margin-top: 0.25em;
+}
+.prose blockquote {
+  border-left: 3px solid var(--border-strong);
+  padding-left: 1em;
+  color: var(--fg-muted);
+}
+.prose .table-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.925em;
+}
+.prose th,
+.prose td {
+  border: 1px solid var(--border);
+  padding: 0.4em 0.7em;
+  text-align: left;
+  /* Cells keep readable widths; the wrapper scrolls instead of breaking every word. */
+  overflow-wrap: normal;
+  min-width: 6ch;
+}
+.prose th {
+  background: var(--surface-2);
+  font-weight: 600;
+}
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+.prose img {
+  max-width: 100%;
+  border-radius: var(--radius-md);
+}
+.prose input[type="checkbox"] {
+  margin-right: 0.4em;
+}
+
+/* ---------- Motion ---------------------------------------------------------- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-fade-up {
+  animation: fade-up 240ms var(--ease) both;
+}
+
+/* Dialogs are bottom sheets on phones and slide up. */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 639.98px) {
+  /* "backwards", not "both": once the sheet has arrived, an inline transform must be able to drag it. */
+  dialog[open] {
+    animation: slide-up 260ms var(--ease) backwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
